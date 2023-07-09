@@ -1,2 +1,2 @@
 # cat-app
-Start new project
+Start new pet project
