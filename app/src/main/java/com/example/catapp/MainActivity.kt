@@ -3,11 +3,14 @@ package com.example.catapp
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.catapp.databinding.ActivityMainBinding
 import com.example.catapp.data.model.retrofit.ApiHelper
 import com.example.catapp.data.model.retrofit.RetrofitBuilder
+import com.example.catapp.ui.favoritefragment.FavoriteFragment
+import com.example.catapp.ui.mainfragment.MainFragment
 import com.example.catapp.utills.Status
 
 
@@ -18,35 +21,28 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        setupViewModel()
-        binding.button.setOnClickListener {
-            setupObservers()
+        loadFragment(MainFragment())
+        binding.bottomNavView.setOnItemSelectedListener {
+            when(it.itemId){
+                R.id.home -> {
+                    loadFragment(MainFragment())
+                    true
+                }
+                R.id.favorite -> {
+                    loadFragment(FavoriteFragment())
+                    true
+                }
+                else ->
+                    true
+            }
         }
 
     }
-    private fun setupViewModel(){
-        viewModel = ViewModelProvider(
-            this,
-            CatViewModelFactory(ApiHelper(RetrofitBuilder.apiService))
-        )[CatViewModel::class.java]
-    }
-    private fun setupObservers() {
-        viewModel.getRandomCat().observe(this, Observer {
-            it?.let { resource ->
-                when (resource.status) {
-                    Status.SUCCESS -> {
-                        Log.d("MyLog", "Success: ${resource.data}")
-                    }
 
-                    Status.ERROR -> {
-                        Log.d("MyLog", "Error: ${resource.message}")
-                    }
-
-                    Status.LOADING -> {
-                        Log.d("MyLog", "Loading")
-                    }
-                }
-            }
-        })
+    private fun loadFragment(fragment: Fragment){
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.container,fragment)
+        transaction.commit()
     }
+
 }
